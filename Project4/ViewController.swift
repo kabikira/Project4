@@ -9,9 +9,12 @@ import WebKit
 import UIKit
 
 class ViewController: UIViewController, WKNavigationDelegate {
-    var webView: WKWebView!
+    
+    @IBOutlet var webView: WKWebView!
+//    var webView: WKWebView!
     var progressView: UIProgressView!
     var websites = ["apple.com", "hackingwithswift.com", "google.com"]
+    var selectedUrl: String?
     
     override func loadView() {
         webView = WKWebView()
@@ -21,10 +24,10 @@ class ViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url = URL(string: "https://" + websites[0])!
+        let url = URL(string: "https://" + (selectedUrl ?? "apple.com"))!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
-        
+                
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Open", style: .plain, target: self, action: #selector(openTapped))
@@ -35,8 +38,12 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: webView, action: #selector(webView.reload))
+        
+        let goBack = UIBarButtonItem(barButtonSystemItem: .rewind, target: webView, action: #selector(webView.goBack))
+        
+        let goForword = UIBarButtonItem(barButtonSystemItem: .fastForward, target: webView, action: #selector(webView.goForward))
 
-        toolbarItems = [progressButton,spacer, refresh]
+        toolbarItems = [progressButton,spacer, refresh, goBack, goForword]
         navigationController?.isToolbarHidden = false
         
     }
@@ -72,8 +79,13 @@ class ViewController: UIViewController, WKNavigationDelegate {
                     return
                 }
             }
+            let ac = UIAlertController(title: "Not allowed", message: nil, preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Done", style: .default, handler: nil))
+            present(ac, animated: true)
         }
         decisionHandler(.cancel)
+        
+        
     }
 
 
